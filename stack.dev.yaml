@@ -1,0 +1,15 @@
+apiVersion: stack-cli.dev/v1
+kind: StackApp
+metadata:
+  name: stack-app
+  namespace: nails-demo
+spec:
+  db:
+    danger_override_password: testpassword
+    expose_db_port: 30001
+  web:
+    image: traefik/whoami:v1.11
+    port: 80
+    expose_app_port: 30000
+  auth:
+    danger_override_jwt: "1"

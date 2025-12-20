@@ -1,0 +1,42 @@
+# This file was generated with `clorinde`. Do not modify.
+
+[package]
+name = "clorinde"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies.chrono]
+version = "0.4.42"
+
+[dependencies.deadpool-postgres]
+version = "0.14.1"
+optional = true
+
+[dependencies.futures]
+version = "0.3.31"
+
+[dependencies.postgres]
+version = "0.19.12"
+features = ["with-chrono-0_4", "with-uuid-1"]
+optional = true
+
+[dependencies.postgres-protocol]
+version = "0.6.9"
+
+[dependencies.postgres-types]
+version = "0.2.11"
+features = ["derive"]
+
+[dependencies.tokio-postgres]
+version = "0.7.15"
+features = ["with-chrono-0_4", "with-uuid-1"]
+default-features = false
+
+[dependencies.uuid]
+version = "1.18.1"
+
+[features]
+deadpool = ["dep:deadpool-postgres", "tokio-postgres/default"]
+default = ["dep:postgres", "deadpool"]
+wasm-async = ["tokio-postgres/js", "chrono/wasmbind"]

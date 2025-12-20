@@ -1,0 +1,8 @@
+[package]
+name = "db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clorinde ={ version = "0.0.0", path = "../clorinde" }
+tokio = { version = "1", features = ["full"] }
