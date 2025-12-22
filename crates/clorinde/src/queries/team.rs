@@ -1,10 +1,17 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Clone, Copy, Debug)]
+pub struct CreateTeamParams {
+    pub left_partner_id: uuid::Uuid,
+    pub right_partner_id: uuid::Uuid,
+    pub player_id: uuid::Uuid,
+}
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Team {
     pub id: uuid::Uuid,
     pub left_partner_id: uuid::Uuid,
     pub right_partner_id: uuid::Uuid,
+    pub player_id: uuid::Uuid,
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
 }
 use crate::client::async_::GenericClient;
@@ -76,7 +83,7 @@ where
 pub struct GetTeamsStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn get_teams() -> GetTeamsStmt {
     GetTeamsStmt(
-        "SELECT id, left_partner_id, right_partner_id, created_at FROM tagteam.team",
+        "SELECT id, left_partner_id, right_partner_id, player_id, created_at FROM tagteam.team",
         None,
     )
 }
@@ -102,10 +109,112 @@ impl GetTeamsStmt {
                     id: row.try_get(0)?,
                     left_partner_id: row.try_get(1)?,
                     right_partner_id: row.try_get(2)?,
-                    created_at: row.try_get(3)?,
+                    player_id: row.try_get(3)?,
+                    created_at: row.try_get(4)?,
                 })
             },
             mapper: |it| Team::from(it),
         }
+    }
+}
+pub struct GetTeamByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn get_team_by_id() -> GetTeamByIdStmt {
+    GetTeamByIdStmt(
+        "SELECT id, left_partner_id, right_partner_id, player_id, created_at FROM tagteam.team WHERE id = $1",
+        None,
+    )
+}
+impl GetTeamByIdStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        id: &'a uuid::Uuid,
+    ) -> TeamQuery<'c, 'a, 's, C, Team, 1> {
+        TeamQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<Team, tokio_postgres::Error> {
+                Ok(Team {
+                    id: row.try_get(0)?,
+                    left_partner_id: row.try_get(1)?,
+                    right_partner_id: row.try_get(2)?,
+                    player_id: row.try_get(3)?,
+                    created_at: row.try_get(4)?,
+                })
+            },
+            mapper: |it| Team::from(it),
+        }
+    }
+}
+pub struct CreateTeamStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn create_team() -> CreateTeamStmt {
+    CreateTeamStmt(
+        "INSERT INTO tagteam.team (id, left_partner_id, right_partner_id, player_id) VALUES (gen_random_uuid(), $1, $2, $3) RETURNING id, left_partner_id, right_partner_id, player_id, created_at",
+        None,
+    )
+}
+impl CreateTeamStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        left_partner_id: &'a uuid::Uuid,
+        right_partner_id: &'a uuid::Uuid,
+        player_id: &'a uuid::Uuid,
+    ) -> TeamQuery<'c, 'a, 's, C, Team, 3> {
+        TeamQuery {
+            client,
+            params: [left_partner_id, right_partner_id, player_id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<Team, tokio_postgres::Error> {
+                Ok(Team {
+                    id: row.try_get(0)?,
+                    left_partner_id: row.try_get(1)?,
+                    right_partner_id: row.try_get(2)?,
+                    player_id: row.try_get(3)?,
+                    created_at: row.try_get(4)?,
+                })
+            },
+            mapper: |it| Team::from(it),
+        }
+    }
+}
+impl<'c, 'a, 's, C: GenericClient>
+    crate::client::async_::Params<
+        'c,
+        'a,
+        's,
+        CreateTeamParams,
+        TeamQuery<'c, 'a, 's, C, Team, 3>,
+        C,
+    > for CreateTeamStmt
+{
+    fn params(
+        &'s self,
+        client: &'c C,
+        params: &'a CreateTeamParams,
+    ) -> TeamQuery<'c, 'a, 's, C, Team, 3> {
+        self.bind(
+            client,
+            &params.left_partner_id,
+            &params.right_partner_id,
+            &params.player_id,
+        )
     }
 }

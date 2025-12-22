@@ -142,3 +142,42 @@ impl GetHeroesStmt {
         }
     }
 }
+pub struct GetHeroByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn get_hero_by_id() -> GetHeroByIdStmt {
+    GetHeroByIdStmt(
+        "SELECT id, display_name, expansion_id, base_power, base_health, created_at FROM tagteam.hero WHERE id = $1",
+        None,
+    )
+}
+impl GetHeroByIdStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        id: &'a uuid::Uuid,
+    ) -> HeroQuery<'c, 'a, 's, C, Hero, 1> {
+        HeroQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<HeroBorrowed, tokio_postgres::Error> {
+                Ok(HeroBorrowed {
+                    id: row.try_get(0)?,
+                    display_name: row.try_get(1)?,
+                    expansion_id: row.try_get(2)?,
+                    base_power: row.try_get(3)?,
+                    base_health: row.try_get(4)?,
+                    created_at: row.try_get(5)?,
+                })
+            },
+            mapper: |it| Hero::from(it),
+        }
+    }
+}

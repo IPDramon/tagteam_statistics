@@ -1,5 +1,11 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Clone, Copy, Debug)]
+pub struct CreatePartnerParams {
+    pub hero_id: uuid::Uuid,
+    pub final_power: i32,
+    pub final_health: i32,
+}
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Partner {
     pub id: uuid::Uuid,
@@ -109,5 +115,106 @@ impl GetPartnersStmt {
             },
             mapper: |it| Partner::from(it),
         }
+    }
+}
+pub struct GetPartnerByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn get_partner_by_id() -> GetPartnerByIdStmt {
+    GetPartnerByIdStmt(
+        "SELECT id, hero_id, final_power, final_health, created_at FROM tagteam.partner WHERE id = $1",
+        None,
+    )
+}
+impl GetPartnerByIdStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        id: &'a uuid::Uuid,
+    ) -> PartnerQuery<'c, 'a, 's, C, Partner, 1> {
+        PartnerQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<Partner, tokio_postgres::Error> {
+                Ok(Partner {
+                    id: row.try_get(0)?,
+                    hero_id: row.try_get(1)?,
+                    final_power: row.try_get(2)?,
+                    final_health: row.try_get(3)?,
+                    created_at: row.try_get(4)?,
+                })
+            },
+            mapper: |it| Partner::from(it),
+        }
+    }
+}
+pub struct CreatePartnerStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn create_partner() -> CreatePartnerStmt {
+    CreatePartnerStmt(
+        "INSERT INTO tagteam.partner (id, hero_id, final_power, final_health) VALUES (gen_random_uuid(), $1, $2, $3) RETURNING id, hero_id, final_power, final_health, created_at",
+        None,
+    )
+}
+impl CreatePartnerStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        hero_id: &'a uuid::Uuid,
+        final_power: &'a i32,
+        final_health: &'a i32,
+    ) -> PartnerQuery<'c, 'a, 's, C, Partner, 3> {
+        PartnerQuery {
+            client,
+            params: [hero_id, final_power, final_health],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<Partner, tokio_postgres::Error> {
+                Ok(Partner {
+                    id: row.try_get(0)?,
+                    hero_id: row.try_get(1)?,
+                    final_power: row.try_get(2)?,
+                    final_health: row.try_get(3)?,
+                    created_at: row.try_get(4)?,
+                })
+            },
+            mapper: |it| Partner::from(it),
+        }
+    }
+}
+impl<'c, 'a, 's, C: GenericClient>
+    crate::client::async_::Params<
+        'c,
+        'a,
+        's,
+        CreatePartnerParams,
+        PartnerQuery<'c, 'a, 's, C, Partner, 3>,
+        C,
+    > for CreatePartnerStmt
+{
+    fn params(
+        &'s self,
+        client: &'c C,
+        params: &'a CreatePartnerParams,
+    ) -> PartnerQuery<'c, 'a, 's, C, Partner, 3> {
+        self.bind(
+            client,
+            &params.hero_id,
+            &params.final_power,
+            &params.final_health,
+        )
     }
 }

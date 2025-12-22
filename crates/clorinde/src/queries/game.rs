@@ -1,5 +1,13 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Clone, Copy, Debug)]
+pub struct CreateGameParams {
+    pub team_one_id: uuid::Uuid,
+    pub team_two_id: uuid::Uuid,
+    pub winner_id: uuid::Uuid,
+    pub loser_id: uuid::Uuid,
+    pub win_condition_id: uuid::Uuid,
+}
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Game {
     pub id: uuid::Uuid,
@@ -113,5 +121,120 @@ impl GetGamesStmt {
             },
             mapper: |it| Game::from(it),
         }
+    }
+}
+pub struct GetGameByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn get_game_by_id() -> GetGameByIdStmt {
+    GetGameByIdStmt(
+        "SELECT id, team_one_id, team_two_id, winner_id, loser_id, win_condition_id, created_at FROM tagteam.game WHERE id = $1",
+        None,
+    )
+}
+impl GetGameByIdStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        id: &'a uuid::Uuid,
+    ) -> GameQuery<'c, 'a, 's, C, Game, 1> {
+        GameQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<Game, tokio_postgres::Error> {
+                Ok(Game {
+                    id: row.try_get(0)?,
+                    team_one_id: row.try_get(1)?,
+                    team_two_id: row.try_get(2)?,
+                    winner_id: row.try_get(3)?,
+                    loser_id: row.try_get(4)?,
+                    win_condition_id: row.try_get(5)?,
+                    created_at: row.try_get(6)?,
+                })
+            },
+            mapper: |it| Game::from(it),
+        }
+    }
+}
+pub struct CreateGameStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn create_game() -> CreateGameStmt {
+    CreateGameStmt(
+        "INSERT INTO tagteam.game (id, team_one_id, team_two_id, winner_id, loser_id, win_condition_id) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5) RETURNING id, team_one_id, team_two_id, winner_id, loser_id, win_condition_id, created_at",
+        None,
+    )
+}
+impl CreateGameStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        team_one_id: &'a uuid::Uuid,
+        team_two_id: &'a uuid::Uuid,
+        winner_id: &'a uuid::Uuid,
+        loser_id: &'a uuid::Uuid,
+        win_condition_id: &'a uuid::Uuid,
+    ) -> GameQuery<'c, 'a, 's, C, Game, 5> {
+        GameQuery {
+            client,
+            params: [
+                team_one_id,
+                team_two_id,
+                winner_id,
+                loser_id,
+                win_condition_id,
+            ],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor: |row: &tokio_postgres::Row| -> Result<Game, tokio_postgres::Error> {
+                Ok(Game {
+                    id: row.try_get(0)?,
+                    team_one_id: row.try_get(1)?,
+                    team_two_id: row.try_get(2)?,
+                    winner_id: row.try_get(3)?,
+                    loser_id: row.try_get(4)?,
+                    win_condition_id: row.try_get(5)?,
+                    created_at: row.try_get(6)?,
+                })
+            },
+            mapper: |it| Game::from(it),
+        }
+    }
+}
+impl<'c, 'a, 's, C: GenericClient>
+    crate::client::async_::Params<
+        'c,
+        'a,
+        's,
+        CreateGameParams,
+        GameQuery<'c, 'a, 's, C, Game, 5>,
+        C,
+    > for CreateGameStmt
+{
+    fn params(
+        &'s self,
+        client: &'c C,
+        params: &'a CreateGameParams,
+    ) -> GameQuery<'c, 'a, 's, C, Game, 5> {
+        self.bind(
+            client,
+            &params.team_one_id,
+            &params.team_two_id,
+            &params.winner_id,
+            &params.loser_id,
+            &params.win_condition_id,
+        )
     }
 }

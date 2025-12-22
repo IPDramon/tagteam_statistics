@@ -125,3 +125,40 @@ impl GetExpansionsStmt {
         }
     }
 }
+pub struct GetExpansionByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn get_expansion_by_id() -> GetExpansionByIdStmt {
+    GetExpansionByIdStmt(
+        "SELECT id, title, created_at FROM tagteam.expansion WHERE id = $1",
+        None,
+    )
+}
+impl GetExpansionByIdStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        id: &'a uuid::Uuid,
+    ) -> ExpansionQuery<'c, 'a, 's, C, Expansion, 1> {
+        ExpansionQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<ExpansionBorrowed, tokio_postgres::Error> {
+                    Ok(ExpansionBorrowed {
+                        id: row.try_get(0)?,
+                        title: row.try_get(1)?,
+                        created_at: row.try_get(2)?,
+                    })
+                },
+            mapper: |it| Expansion::from(it),
+        }
+    }
+}

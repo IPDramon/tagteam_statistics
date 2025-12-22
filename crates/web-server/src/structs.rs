@@ -33,6 +33,7 @@ struct Team<'a> {
     id: String,
     left_partner: &'a Partner<'a>,
     right_partner: &'a Partner<'a>,
+    player: &'a Player,
     created_at: DateTime<Utc>,
 }
 

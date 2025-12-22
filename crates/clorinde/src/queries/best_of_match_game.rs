@@ -1,5 +1,10 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Clone, Copy, Debug)]
+pub struct AddGameToBestOfMatchParams {
+    pub match_id: uuid::Uuid,
+    pub game_id: uuid::Uuid,
+}
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct BestOfMatchGame {
     pub match_id: uuid::Uuid,
@@ -109,5 +114,61 @@ impl GetBestOfMatchGamesStmt {
                 },
             mapper: |it| BestOfMatchGame::from(it),
         }
+    }
+}
+pub struct AddGameToBestOfMatchStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn add_game_to_best_of_match() -> AddGameToBestOfMatchStmt {
+    AddGameToBestOfMatchStmt(
+        "INSERT INTO tagteam.best_of_match_game (match_id, game_id, game_order) VALUES ($1, $2, (SELECT COALESCE(MAX(game_order), 0) + 1 FROM tagteam.best_of_match_game WHERE match_id = $1)) RETURNING match_id, game_id, game_order",
+        None,
+    )
+}
+impl AddGameToBestOfMatchStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        match_id: &'a uuid::Uuid,
+        game_id: &'a uuid::Uuid,
+    ) -> BestOfMatchGameQuery<'c, 'a, 's, C, BestOfMatchGame, 2> {
+        BestOfMatchGameQuery {
+            client,
+            params: [match_id, game_id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<BestOfMatchGame, tokio_postgres::Error> {
+                    Ok(BestOfMatchGame {
+                        match_id: row.try_get(0)?,
+                        game_id: row.try_get(1)?,
+                        game_order: row.try_get(2)?,
+                    })
+                },
+            mapper: |it| BestOfMatchGame::from(it),
+        }
+    }
+}
+impl<'c, 'a, 's, C: GenericClient>
+    crate::client::async_::Params<
+        'c,
+        'a,
+        's,
+        AddGameToBestOfMatchParams,
+        BestOfMatchGameQuery<'c, 'a, 's, C, BestOfMatchGame, 2>,
+        C,
+    > for AddGameToBestOfMatchStmt
+{
+    fn params(
+        &'s self,
+        client: &'c C,
+        params: &'a AddGameToBestOfMatchParams,
+    ) -> BestOfMatchGameQuery<'c, 'a, 's, C, BestOfMatchGame, 2> {
+        self.bind(client, &params.match_id, &params.game_id)
     }
 }

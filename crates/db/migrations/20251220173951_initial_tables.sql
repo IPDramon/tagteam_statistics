@@ -36,9 +36,11 @@ CREATE TABLE tagteam.team (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     left_partner_id UUID NOT NULL,
     right_partner_id UUID NOT NULL,
+    player_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (left_partner_id) REFERENCES tagteam.partner(id),
-    FOREIGN KEY (right_partner_id) REFERENCES tagteam.partner(id)
+    FOREIGN KEY (right_partner_id) REFERENCES tagteam.partner(id),
+    FOREIGN KEY (player_id) REFERENCES tagteam.player(id)
 );
 
 CREATE TABLE tagteam.win_condition (
@@ -74,7 +76,7 @@ CREATE TABLE tagteam.best_of_match_game (
     match_id UUID NOT NULL,
     game_id UUID NOT NULL,
     game_order INTEGER NOT NULL,
-    PRIMARY KEY DEFAULT gen_random_uuid() (match_id, game_id),
+    PRIMARY KEY (match_id, game_id),
     FOREIGN KEY (match_id) REFERENCES tagteam.best_of_match(id) ON DELETE CASCADE,
     FOREIGN KEY (game_id) REFERENCES tagteam.game(id) ON DELETE CASCADE
 );

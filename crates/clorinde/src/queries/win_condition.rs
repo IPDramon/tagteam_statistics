@@ -136,3 +136,41 @@ impl GetWinConditionsStmt {
         }
     }
 }
+pub struct GetWinConditionByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn get_win_condition_by_id() -> GetWinConditionByIdStmt {
+    GetWinConditionByIdStmt(
+        "SELECT id, title, description, created_at FROM tagteam.win_condition WHERE id = $1",
+        None,
+    )
+}
+impl GetWinConditionByIdStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s self,
+        client: &'c C,
+        id: &'a uuid::Uuid,
+    ) -> WinConditionQuery<'c, 'a, 's, C, WinCondition, 1> {
+        WinConditionQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<WinConditionBorrowed, tokio_postgres::Error> {
+                    Ok(WinConditionBorrowed {
+                        id: row.try_get(0)?,
+                        title: row.try_get(1)?,
+                        description: row.try_get(2)?,
+                        created_at: row.try_get(3)?,
+                    })
+                },
+            mapper: |it| WinCondition::from(it),
+        }
+    }
+}
