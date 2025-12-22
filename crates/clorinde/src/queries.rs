@@ -1,11 +1,11 @@
 // This file was generated with `clorinde`. Do not modify.
 
-pub mod best_of_match;
-pub mod best_of_match_game;
-pub mod expansion;
-pub mod game;
-pub mod hero;
-pub mod partner;
-pub mod player;
-pub mod team;
-pub mod win_condition;
+pub mod BestOfMatchClient;
+pub mod BestOfMatchGameClient;
+pub mod ExpansionClient;
+pub mod GameClient;
+pub mod HeroClient;
+pub mod PartnerClient;
+pub mod PlayerClient;
+pub mod TeamClient;
+pub mod WinConditionClient;

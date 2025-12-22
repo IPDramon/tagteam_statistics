@@ -202,11 +202,14 @@ impl CreatePlayerStmt {
         }
     }
 }
-pub struct DeletePlayerStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn delete_player() -> DeletePlayerStmt {
-    DeletePlayerStmt("DELETE FROM tagteam.player WHERE id = $1", None)
+pub struct DeletePlayerByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn delete_player_by_id() -> DeletePlayerByIdStmt {
+    DeletePlayerByIdStmt(
+        "DELETE FROM tagteam.player WHERE id = $1 RETURNING id, display_name, created_at",
+        None,
+    )
 }
-impl DeletePlayerStmt {
+impl DeletePlayerByIdStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -214,11 +217,25 @@ impl DeletePlayerStmt {
         self.1 = Some(client.prepare(self.0).await?);
         Ok(self)
     }
-    pub async fn bind<'c, 'a, 's, C: GenericClient>(
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
         &'s self,
         client: &'c C,
         id: &'a uuid::Uuid,
-    ) -> Result<u64, tokio_postgres::Error> {
-        client.execute(self.0, &[id]).await
+    ) -> PlayerQuery<'c, 'a, 's, C, Player, 1> {
+        PlayerQuery {
+            client,
+            params: [id],
+            query: self.0,
+            cached: self.1.as_ref(),
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<PlayerBorrowed, tokio_postgres::Error> {
+                    Ok(PlayerBorrowed {
+                        id: row.try_get(0)?,
+                        display_name: row.try_get(1)?,
+                        created_at: row.try_get(2)?,
+                    })
+                },
+            mapper: |it| Player::from(it),
+        }
     }
 }

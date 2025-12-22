@@ -14,6 +14,7 @@ INSERT INTO tagteam.player (id, display_name)
 VALUES (gen_random_uuid(),:display_name)
 RETURNING id, display_name, created_at;
 
---! delete_player
+--! delete_player_by_id: Player
 DELETE FROM tagteam.player
-WHERE id = :id;
+WHERE id = :id
+RETURNING id, display_name, created_at;

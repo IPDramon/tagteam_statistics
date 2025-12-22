@@ -45,8 +45,7 @@ CREATE TABLE tagteam.team (
 
 CREATE TABLE tagteam.win_condition (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
+    code VARCHAR(100) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -64,6 +63,7 @@ CREATE TABLE tagteam.game (
     winner_id UUID NOT NULL,
     loser_id UUID NOT NULL,
     win_condition_id UUID NOT NULL,
+    num_rounds INTEGER NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (team_one_id) REFERENCES tagteam.team(id),
     FOREIGN KEY (team_two_id) REFERENCES tagteam.team(id),
@@ -90,4 +90,5 @@ DROP TABLE IF EXISTS tagteam.team;
 DROP TABLE IF EXISTS tagteam.partner;
 DROP TABLE IF EXISTS tagteam.player;
 DROP TABLE IF EXISTS tagteam.hero;
+DROP TABLE IF EXISTS tagteam.expansion;
 DROP SCHEMA IF EXISTS tagteam;
