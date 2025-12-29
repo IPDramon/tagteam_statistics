@@ -6,6 +6,9 @@ dev-init:
 dev-setup:
     stack init
     stack install --manifest stack.dev.yaml
+    
+    just generate-openapi
+    just generate-db-client
 
 # Retrieve the cluster kube config - so kubectl and k9s work.
 get-config:
@@ -15,3 +18,18 @@ get-config:
     sed -i '/certificate-authority-data/d' "$HOME/.kube/config"
     sed -i '/cluster:/a \ \ \ \ insecure-skip-tls-verify: true' "$HOME/.kube/config"
     echo "✅ kubeconfig updated and TLS verification disabled"
+
+install-openapi-generator:
+    cd openapi && npm i
+    echo "✅ OpenAPI Generator CLI installed"
+
+generate-openapi:
+    echo "Generating OpenAPI client..."
+    cd openapi && \
+    npx openapi-generator-cli generate -g rust-axum -o ../crates/openapi -i api.yaml
+    echo "✅ OpenAPI client generated"
+
+generate-db-client:
+    echo "Generating database client..."
+    clorinde live -q ./crates/db/queries/ -d ./crates/clorinde/
+    echo "✅ Database client generated"

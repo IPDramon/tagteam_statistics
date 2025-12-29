@@ -28,14 +28,16 @@
         "files.watcherExclude": {
           "**/target/**": true
         },
-        "rust-analyzer.checkOnSave.command": "clippy"
+        "rust-analyzer.checkOnSave": true
       },
       "extensions": [
         "vadimcn.vscode-lldb",
         "mutantdino.resourcemonitor",
         "matklad.rust-analyzer",
         "tamasfe.even-better-toml",
-        "fill-labs.dependi"
+        "fill-labs.dependi",
+        "rust-lang.rust-analyzer",
+        "redhat.vscode-yaml"
       ]
     }
   },

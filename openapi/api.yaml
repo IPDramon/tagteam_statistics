@@ -1,0 +1,226 @@
+openapi: 3.0.4
+info:
+  title: TagTeam Statistics API
+  version: 0.0.1
+
+servers:
+  - url: https://localhost:8080/v1
+    description: Local development server
+
+paths:
+  /heroes:
+    get:
+      operationId: listHeroes
+      summary: Get a list of heroes
+      responses:
+        '200':
+          description: A list of heroes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Hero'
+  /players:
+    get:
+      operationId: listPlayers
+      summary: Get a list of players
+      responses:
+        '200':
+          description: A list of players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+  /bestofmatch:
+    post:
+      operationId: createBestOfMatch
+      summary: Add a best of match record
+      responses:
+        '201':
+          description: The created best of match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BestOfMatch'
+  /games:
+    post:
+      operationId: addGame
+      summary: Add a game to a best of match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGame'
+      responses:
+        '201':
+          description: Created game record
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Game'
+  /winconditions:
+    get:
+      operationId: listWinConditions
+      summary: Get a list of win conditions
+      responses:
+        '200':
+          description: A list of win conditions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WinCondition'
+  /cards/{hero_id}:
+    get:
+      operationId: listCardsForHero
+      summary: Get a list of cards
+      parameters:
+        - name: hero_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the hero to get cards for
+      responses:
+        '200':
+          description: A list of cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+  
+
+components:
+  schemas:
+    Expansion:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "00000000-0000-0000-0000-000000000000"
+        title:
+          type: string
+          example: "Base Set"
+    Hero:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "11111111-1111-1111-1111-111111111111"
+        display_name:
+          type: string
+          example: "Captain Example"
+        expansion:
+          $ref: '#/components/schemas/Expansion'
+        base_power:
+          type: integer
+          example: 5
+        base_health:
+          type: integer
+          example: 10
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "22222222-2222-2222-2222-222222222222"
+        display_name:
+          type: string
+          example: "Player One"
+    Partner:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "33333333-3333-3333-3333-333333333333"
+        hero:
+          $ref: '#/components/schemas/Hero'
+        final_power:
+          type: integer
+          example: 8
+        final_health:
+          type: integer
+          example: 12
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "44444444-4444-4444-4444-444444444444"
+        left_partner_id:
+          $ref: '#/components/schemas/Partner'
+        right_partner_id:
+          $ref: '#/components/schemas/Partner'
+        player_id:
+          $ref: '#/components/schemas/Player'
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+    WinCondition:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "55555555-5555-5555-5555-555555555555"
+        code:
+          type: string
+          example: "ko"
+    BestOfMatch:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "66666666-6666-6666-6666-666666666666"
+        winner:
+          $ref: '#/components/schemas/Player'
+        loser:
+          $ref: '#/components/schemas/Player'
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "88888888-8888-8888-8888-888888888888"
+        winner_team:
+          $ref: '#/components/schemas/Team'
+        loser_team:
+          $ref: '#/components/schemas/Team'
+        win_condition:
+          $ref: '#/components/schemas/WinCondition'
+        num_rounds:
+          type: integer
+          example: 3
+    Card:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "99999999-9999-9999-9999-999999999999"
+        title:
+          type: string
+          example: "Example Card"
+    NewGame:
+      type: object
+      properties:
+        best_of_match_id:
+          type: string
+          example: "66666666-6666-6666-6666-666666666666"
+        winner_team:
+          $ref: '#/components/schemas/Team'
+        loser_team:
+          $ref: '#/components/schemas/Team'
+        win_condition:
+          $ref: '#/components/schemas/WinCondition'
+        num_rounds:
+          type: integer
+          example: 3

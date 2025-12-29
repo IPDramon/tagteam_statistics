@@ -1,7 +1,4 @@
 -- migrate:up
-INSERT INTO tagteam.expansion (id, title)
-VALUES (gen_random_uuid(), 'Base Game');
-
 INSERT INTO tagteam.win_condition (id, code)
 VALUES 
 (gen_random_uuid(), 'ko'),

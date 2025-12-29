@@ -32,6 +32,13 @@ CREATE TABLE tagteam.partner (
     FOREIGN KEY (hero_id) REFERENCES tagteam.hero(id)
 );
 
+CREATE TABLE tagteam.card (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    hero_id UUID NOT NULL,
+    FOREIGN KEY (hero_id) REFERENCES tagteam.hero(id)
+);
+
 CREATE TABLE tagteam.team (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     left_partner_id UUID NOT NULL,
@@ -41,6 +48,15 @@ CREATE TABLE tagteam.team (
     FOREIGN KEY (left_partner_id) REFERENCES tagteam.partner(id),
     FOREIGN KEY (right_partner_id) REFERENCES tagteam.partner(id),
     FOREIGN KEY (player_id) REFERENCES tagteam.player(id)
+);
+
+CREATE TABLE tagteam.deck (
+    team_id UUID NOT NULL,
+    card_id UUID NOT NULL,
+    card_order INTEGER NOT NULL,
+    FOREIGN KEY (card_id) REFERENCES tagteam.card(id),
+    FOREIGN KEY (team_id) REFERENCES tagteam.team(id),
+    PRIMARY KEY (team_id, card_order, card_id)
 );
 
 CREATE TABLE tagteam.win_condition (
@@ -86,7 +102,9 @@ DROP TABLE IF EXISTS tagteam.best_of_match_game;
 DROP TABLE IF EXISTS tagteam.best_of_match;
 DROP TABLE IF EXISTS tagteam.game;
 DROP TABLE IF EXISTS tagteam.win_condition;
+DROP TABLE IF EXISTS tagteam.deck;
 DROP TABLE IF EXISTS tagteam.team;
+DROP TABLE IF EXISTS tagteam.card;
 DROP TABLE IF EXISTS tagteam.partner;
 DROP TABLE IF EXISTS tagteam.player;
 DROP TABLE IF EXISTS tagteam.hero;
