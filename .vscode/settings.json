@@ -1,0 +1,14 @@
+{
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "host.docker.internal",
+      "port": 30001,
+      "driver": "PostgreSQL",
+      "name": "local",
+      "database": "stack-app",
+      "username": "db-owner"
+    }
+  ]
+}

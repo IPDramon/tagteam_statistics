@@ -37,7 +37,8 @@
         "tamasfe.even-better-toml",
         "fill-labs.dependi",
         "rust-lang.rust-analyzer",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "uniquevision.vscode-plpgsql-lsp"
       ]
     }
   },

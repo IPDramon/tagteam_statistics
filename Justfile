@@ -3,11 +3,18 @@ dev-init:
     k3d cluster create k3d-nails --agents 1 -p "30000-30001:30000-30001@agent:0"
     just get-config
 
+
 dev-setup:
     stack init
     stack install --manifest stack.dev.yaml
     
+    echo "Waiting for the database to be ready..."
+    sleep 30
+    echo "Database should be ready now."
+
     just generate-openapi
+
+    dbmate up
     just generate-db-client
 
 # Retrieve the cluster kube config - so kubectl and k9s work.
