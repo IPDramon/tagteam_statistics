@@ -10,6 +10,6 @@ FROM tagteam.partner
 WHERE id = :id;
 
 --! create_partner : Partner
-INSERT INTO tagteam.partner (id, hero_id)
-VALUES (gen_random_uuid(), :hero_id)
+INSERT INTO tagteam.partner (hero_id)
+VALUES (:hero_id)
 RETURNING id, hero_id, created_at;

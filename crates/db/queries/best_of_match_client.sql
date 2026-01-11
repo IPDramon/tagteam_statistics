@@ -10,8 +10,8 @@ FROM tagteam.best_of_match
 WHERE id = :id; 
 
 --! create_best_of_match : BestOfMatch
-INSERT INTO tagteam.best_of_match (id, winner_id, loser_id)
-VALUES (gen_random_uuid(), NULL, NULL)
+INSERT INTO tagteam.best_of_match (winner_id, loser_id)
+VALUES (NULL, NULL)
 RETURNING id, winner_id, loser_id, created_at;
 
 --! update_best_of_match : BestOfMatch

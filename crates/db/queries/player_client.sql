@@ -10,8 +10,8 @@ FROM tagteam.player
 WHERE id = :id;
 
 --! create_player : Player
-INSERT INTO tagteam.player (id, display_name)
-VALUES (gen_random_uuid(),:display_name)
+INSERT INTO tagteam.player (display_name)
+VALUES (:display_name)
 RETURNING id, display_name, created_at;
 
 --! delete_player_by_id: Player
